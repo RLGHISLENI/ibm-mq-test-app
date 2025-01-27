@@ -1,5 +1,5 @@
-# ibm-mq-test
-An example of .NET 8 using IBM MQ
+# ibm-mq-test-app
+An example of .NET 8 using IBM MQ - Windows Forms Application
 
 # Docker YML for IBM MQ
 Run the IMB MQ on a Docker Container.
