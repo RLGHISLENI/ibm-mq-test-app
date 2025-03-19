@@ -97,12 +97,20 @@ namespace IbmMQTestApp.Forms
             this.Dispose();
             ConnForm.LoadQueueData();
             ConnForm.LoadMessageData();
-
+            if (!ConnForm.IsHandleCreated) 
+            { 
+                ConnForm.SaveSettings();
+            }
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            this.Close();
+            this.Dispose();
+            if (!ConnForm.IsHandleCreated)
+            {
+                ConnForm.MainForm.Show();
+                ConnForm.Dispose();
+            }
         }
     }
 }

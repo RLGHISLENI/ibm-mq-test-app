@@ -28,18 +28,18 @@ namespace IbmMQTestApp.Forms
                 AppSettings.SavedSettings = new List<QueueConfigurationSettings>();
             }
 
-            
+
 
             if (CurrentSettings != null && string.IsNullOrEmpty(CurrentSettings.SettingsName) == false)
             {
-                var newSettings =  CurrentSettings.CopySettings();
-                
+                var newSettings = CurrentSettings.CopySettings();
+
                 if (CommonFormActions.ShowAskInformationMessage("Do you want to copy current settings?", "NEW CONNECTION") == false)
                 {
                     newSettings = new QueueConfigurationSettings();
-                    
+
                 }
-                
+
                 ConnectionForm connectionForm = new ConnectionForm(this, newSettings);
                 connectionForm.ShowDialog();
 
@@ -50,9 +50,9 @@ namespace IbmMQTestApp.Forms
                 ConnectionForm connectionForm = new ConnectionForm(this, newSettings);
                 connectionForm.ShowDialog();
             }
-            
 
-            
+
+
         }
 
         public void LoadComboBox()
@@ -160,20 +160,23 @@ namespace IbmMQTestApp.Forms
             }
         }
 
-        private void lvQueues_MouseDoubleClick(object sender, MouseEventArgs e)
+        private async void lvQueues_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             var queue = lvQueues.GetKeyItemSelected();
             try
             {
                 var queueService = new QueueTransientService(CurrentSettings.QueueSettings);
-                var messages = queueService.GetQueueDepth(queue);
-                if (messages == 0)
+                var messagesQtd = queueService.GetQueueDepth(queue);
+                if (messagesQtd == 0)
                 {
                     CommonFormActions.ShowInformationMessage($"Queue {queue} is empty", "INFO");
                 }
                 else
                 {
-                    CommonFormActions.ShowInformationMessage($"Has {messages} message(s).", $"Queue: {queue}");
+                    var messages = await queueService.GetQueueMessages(queue);
+                    QueueContentForm queueContentForm = new QueueContentForm(this, queue, messages.ToList());
+                    Hide();
+                    queueContentForm.ShowDialog();
                 }
             }
             catch (Exception ex)
@@ -331,6 +334,17 @@ namespace IbmMQTestApp.Forms
                 return;
             }
             SaveConfigurationFile(AppSettings.ConfigFile);
+        }
+
+        private void lvMessages_DoubleClick(object sender, EventArgs e)
+        {
+            ConnectionForm connectionForm = new ConnectionForm(this, CurrentSettings);
+            var alias = lvMessages.SelectedItems[0].Text.ToString();
+            var message = lvMessages.SelectedItems[0].SubItems[1].Text.ToString();
+
+            var aliasTextForm = new AliasTextForm(connectionForm, alias, message, false);
+            this.Hide();
+            aliasTextForm.ShowDialog();
         }
     }
 }
