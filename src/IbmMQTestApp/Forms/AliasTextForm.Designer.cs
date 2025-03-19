@@ -45,9 +45,11 @@
             groupBox1.Controls.Add(tbText);
             groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(tbAlias);
-            groupBox1.Location = new Point(34, 24);
+            groupBox1.Location = new Point(14, 9);
+            groupBox1.Margin = new Padding(1);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(1185, 185);
+            groupBox1.Padding = new Padding(1);
+            groupBox1.Size = new Size(950, 302);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
             groupBox1.Text = "Data";
@@ -55,40 +57,46 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(341, 58);
+            label2.Location = new Point(11, 83);
+            label2.Margin = new Padding(1, 0, 1, 0);
             label2.Name = "label2";
-            label2.Size = new Size(78, 41);
+            label2.Size = new Size(31, 15);
             label2.TabIndex = 6;
             label2.Text = "Text:";
             // 
             // tbText
             // 
-            tbText.Location = new Point(341, 102);
+            tbText.Location = new Point(11, 109);
+            tbText.Margin = new Padding(1);
+            tbText.Multiline = true;
             tbText.Name = "tbText";
-            tbText.Size = new Size(813, 47);
+            tbText.Size = new Size(924, 177);
             tbText.TabIndex = 5;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(18, 58);
+            label1.Location = new Point(7, 21);
+            label1.Margin = new Padding(1, 0, 1, 0);
             label1.Name = "label1";
-            label1.Size = new Size(86, 41);
+            label1.Size = new Size(35, 15);
             label1.TabIndex = 4;
             label1.Text = "Alias:";
             // 
             // tbAlias
             // 
-            tbAlias.Location = new Point(18, 102);
+            tbAlias.Location = new Point(11, 37);
+            tbAlias.Margin = new Padding(1);
             tbAlias.Name = "tbAlias";
-            tbAlias.Size = new Size(292, 47);
+            tbAlias.Size = new Size(311, 23);
             tbAlias.TabIndex = 3;
             // 
             // btnSave
             // 
-            btnSave.Location = new Point(898, 225);
+            btnSave.Location = new Point(844, 324);
+            btnSave.Margin = new Padding(1);
             btnSave.Name = "btnSave";
-            btnSave.Size = new Size(290, 58);
+            btnSave.Size = new Size(120, 30);
             btnSave.TabIndex = 8;
             btnSave.Text = "Save";
             btnSave.UseVisualStyleBackColor = true;
@@ -96,9 +104,10 @@
             // 
             // btnCancel
             // 
-            btnCancel.Location = new Point(520, 225);
+            btnCancel.Location = new Point(702, 324);
+            btnCancel.Margin = new Padding(1);
             btnCancel.Name = "btnCancel";
-            btnCancel.Size = new Size(290, 58);
+            btnCancel.Size = new Size(120, 30);
             btnCancel.TabIndex = 7;
             btnCancel.Text = "Cancel";
             btnCancel.UseVisualStyleBackColor = true;
@@ -106,17 +115,18 @@
             // 
             // AliasTextForm
             // 
-            AutoScaleDimensions = new SizeF(17F, 41F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1255, 310);
+            ClientSize = new Size(974, 364);
             Controls.Add(btnSave);
             Controls.Add(btnCancel);
             Controls.Add(groupBox1);
             Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(1);
             MaximizeBox = false;
-            MaximumSize = new Size(1287, 398);
+            MaximumSize = new Size(990, 403);
             MinimizeBox = false;
-            MinimumSize = new Size(1287, 398);
+            MinimumSize = new Size(990, 403);
             Name = "AliasTextForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Insert Values";
