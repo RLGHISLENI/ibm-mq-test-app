@@ -367,6 +367,7 @@
             lvMessages.TabIndex = 0;
             lvMessages.UseCompatibleStateImageBehavior = false;
             lvMessages.View = View.Details;
+            lvMessages.DoubleClick += lvMessages_DoubleClick;
             // 
             // colMessageAlias
             // 

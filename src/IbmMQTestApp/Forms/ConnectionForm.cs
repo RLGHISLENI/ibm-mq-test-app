@@ -155,10 +155,7 @@ namespace IbmMQTestApp.Forms
 
         private void btnConnectionSave_Click(object sender, EventArgs e)
         {
-            Settings = FormToSettings();
-            MainForm.SaveSettings(Settings);
-            MainForm.Show();
-            this.Close();
+            SaveSettings();
         }
 
         private void gbConnections_Enter(object sender, EventArgs e)
@@ -179,6 +176,14 @@ namespace IbmMQTestApp.Forms
             {
                 this.Close();
             }
+        }
+
+        public void SaveSettings()
+        {
+            Settings = FormToSettings();
+            MainForm.SaveSettings(Settings);
+            MainForm.Show();
+            this.Dispose();
         }
     }
 }

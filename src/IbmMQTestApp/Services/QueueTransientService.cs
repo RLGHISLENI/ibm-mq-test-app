@@ -2,6 +2,7 @@
 using System.Collections;
 using IbmMQTestApp.Settings;
 using IbmMQTestApp.Entities;
+using Newtonsoft.Json.Converters;
 
 
 namespace IbmMQTestApp.Services
@@ -47,58 +48,60 @@ namespace IbmMQTestApp.Services
             }
         }
 
-        public async Task StartQueueProcessor(Func<string, string, CancellationToken, Task> callBack, string queue, CancellationToken stoppingToken)
+        public async Task<IEnumerable<SimpleMessage>> GetQueueMessages(string queue)
         {
+            var messages = new List<SimpleMessage>();
             InitQueue(queue);
-            bool _continue = true;
-            while (_continue && !stoppingToken.IsCancellationRequested)
+
+            if (IsQueueEmpty())
+            {
+                return messages;
+            }
+
+            // Options for browsing messages
+            MQGetMessageOptions mqGetMsgOpts = new()
+            {
+                Options = MQC.MQGMO_BROWSE_FIRST + MQC.MQGMO_FAIL_IF_QUIESCING,
+                WaitInterval = 0
+            };
+
+            while (true)
             {
                 try
                 {
-
-                    if (IsQueueEmpty())
-                    {
-                        await Task.Delay(10000, stoppingToken); // Wait for some time before checking again
-                        continue;
-                    }
-
                     MQMessage mqMsg = new();
-                    MQGetMessageOptions mqGetMsgOpts = new()
+                    mqQueue.Get(mqMsg, mqGetMsgOpts);
+
+                    // Process the message
+                    string stringMessage = mqMsg.ReadString(mqMsg.MessageLength);
+                    var message = new SimpleMessage
                     {
-                        Options = MQC.MQGMO_LOCK + MQC.MQGMO_FAIL_IF_QUIESCING + MQC.MQGMO_WAIT + MQC.MQGMO_BROWSE_FIRST,
-                        WaitInterval = 10000
+                        Content = stringMessage,
+                        Id = mqMsg.MessageId,
+                        TimeStamp = mqMsg.PutDateTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                        User = mqMsg.PutApplicationName
                     };
 
+                    messages.Add(message);
 
-                    mqQueue.Get(mqMsg, mqGetMsgOpts);
-                    string stringMessage = mqMsg.ReadString(mqMsg.MessageLength);
-
-                    var message = new MessageEntity(stringMessage);
-
-                    if (!message.IsAllowedToRetry())
-                    {
-                        continue;
-                    }
-
-                    await callBack(queue, stringMessage, stoppingToken);
-
-                    mqGetMsgOpts.Options = MQC.MQGMO_MSG_UNDER_CURSOR;
-                    mqQueue.Get(mqMsg, mqGetMsgOpts);
+                    // Update options to browse next message
+                    mqGetMsgOpts.Options = MQC.MQGMO_BROWSE_NEXT + MQC.MQGMO_FAIL_IF_QUIESCING;
                 }
                 catch (MQException mqe)
                 {
-                    if (mqe?.Reason != MQC.MQRC_NO_MSG_AVAILABLE)
+                    if (mqe.Reason == MQC.MQRC_NO_MSG_AVAILABLE)
                     {
-                        _continue = false;
+                        // No more messages to browse
+                        break;
+                    }
+                    else
+                    {
+                        throw;
                     }
                 }
-                catch (Exception ex)
-                {
-
-                    _continue = false;
-
-                }
             }
+
+            return messages;
         }
 
         public async Task SendMessageToQueue(string queue, string message)
@@ -163,5 +166,98 @@ namespace IbmMQTestApp.Services
             mqQMgr = new MQQueueManager(Settings.QueueManagerName, props);
             mqQueue = mqQMgr.AccessQueue(queue, MQC.MQOO_OUTPUT | MQC.MQOO_FAIL_IF_QUIESCING);
         }
+
+
+        public void CleanQueue(string queue)
+        {
+            InitQueue(queue);
+
+            while (!IsQueueEmpty())
+            {
+                try
+                {
+                    // First browse a message
+                    MQGetMessageOptions mqBrowseOpts = new()
+                    {
+                        Options = MQC.MQGMO_BROWSE_FIRST + MQC.MQGMO_FAIL_IF_QUIESCING,
+                        WaitInterval = 10
+                    };
+
+                    MQMessage mqMsg = new();
+                    mqQueue.Get(mqMsg, mqBrowseOpts);
+
+                    // Then do a destructive get with a separate options object
+                    MQGetMessageOptions mqDeleteOpts = new()
+                    {
+                        Options = MQC.MQGMO_MSG_UNDER_CURSOR,
+                        WaitInterval = 10
+                    };
+
+                    mqQueue.Get(new MQMessage(), mqDeleteOpts);
+                }
+                catch (MQException mqe)
+                {
+                    if (mqe.Reason == MQC.MQRC_NO_MSG_AVAILABLE)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+        }
+
+        public void DeleteMessage(string queue, byte[] messageId)
+        {
+            InitQueue(queue);
+            MQGetMessageOptions mqGetMsgOpts = new()
+            {
+                Options = MQC.MQGMO_BROWSE_FIRST + MQC.MQGMO_FAIL_IF_QUIESCING,
+                WaitInterval = 10
+            };
+
+            while (!IsQueueEmpty())
+            {
+                try
+                {
+                    MQMessage mqMsg = new();
+                    mqQueue.Get(mqMsg, mqGetMsgOpts);
+
+                    var id = BitConverter.ToString(mqMsg.MessageId);
+
+                    if (id == BitConverter.ToString(messageId))
+                    {
+                        // Create new options for destructive get
+                        MQGetMessageOptions mqDeleteOpts = new()
+                        {
+                            Options = MQC.MQGMO_MSG_UNDER_CURSOR,
+                            WaitInterval = 10
+                        };
+
+                        // Use the same message object for the destructive get
+                        mqQueue.Get(mqMsg, mqDeleteOpts);
+                        break;
+                    }
+
+                    // Move to next message
+                    mqGetMsgOpts.Options = MQC.MQGMO_BROWSE_NEXT;
+                }
+                catch (MQException mqe)
+                {
+                    if (mqe.Reason == MQC.MQRC_NO_MSG_AVAILABLE)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+        }
+
+
     }
 }

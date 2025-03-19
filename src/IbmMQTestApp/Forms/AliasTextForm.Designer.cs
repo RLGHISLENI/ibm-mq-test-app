@@ -70,6 +70,7 @@
             tbText.Margin = new Padding(1);
             tbText.Multiline = true;
             tbText.Name = "tbText";
+            tbText.ScrollBars = ScrollBars.Both;
             tbText.Size = new Size(924, 177);
             tbText.TabIndex = 5;
             // 
