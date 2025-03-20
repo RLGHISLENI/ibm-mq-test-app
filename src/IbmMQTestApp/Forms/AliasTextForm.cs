@@ -53,7 +53,7 @@ namespace IbmMQTestApp.Forms
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if(string.IsNullOrWhiteSpace(tbAlias.Text.Trim()) || string.IsNullOrEmpty(tbText.Text.Trim()))
+            if (string.IsNullOrWhiteSpace(tbAlias.Text.Trim()) || string.IsNullOrEmpty(tbText.Text.Trim()))
             {
                 CommonFormActions.ShowWarningMessage($"Alias and {(IsQueueData ? "Queue" : "Message")} are required fields.", "WARNING");
                 return;
@@ -97,13 +97,23 @@ namespace IbmMQTestApp.Forms
             this.Dispose();
             ConnForm.LoadQueueData();
             ConnForm.LoadMessageData();
-            if (!ConnForm.IsHandleCreated) 
-            { 
+            if (!ConnForm.IsHandleCreated)
+            {
                 ConnForm.SaveSettings();
             }
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
+        {
+            CancelClose();
+        }
+
+        private void AliasTextForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            CancelClose();
+        }
+
+        private void CancelClose()
         {
             this.Dispose();
             if (!ConnForm.IsHandleCreated)

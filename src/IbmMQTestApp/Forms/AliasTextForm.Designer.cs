@@ -131,6 +131,7 @@
             Name = "AliasTextForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Insert Values";
+            FormClosing += AliasTextForm_FormClosing;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ResumeLayout(false);
