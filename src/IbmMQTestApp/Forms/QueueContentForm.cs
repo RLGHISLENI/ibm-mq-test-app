@@ -9,30 +9,33 @@ namespace IbmMQTestApp.Forms
 
         private MainForm mainForm { get; set; }
         private string queueName { get; set; }
+        private string queueAddress { get; set; }
         private List<SimpleMessage> messages { get; set; }
+        private QueueTransientService queueService { get; set; }
 
         public QueueContentForm()
         {
             InitializeComponent();
         }
 
-        public QueueContentForm(MainForm main, string queue, List<SimpleMessage> messagess)
+        public QueueContentForm(MainForm main, string queue, string address)
         {
             InitializeComponent();
             mainForm = main;
+            queueService = new QueueTransientService(mainForm.CurrentSettings.QueueSettings);
             queueName = queue;
-            messages = messagess;
-            Text = $"Queue: {queueName}";
-            QueueContentForm_Load();
+            queueAddress = address;
+            Text = $"Queue: {queueName} on {queueAddress}";
+            QueueContentFormLoad();
         }
 
-        private void QueueContentForm_Load()
+        private void QueueContentFormLoad()
         {
+            messages = queueService.GetQueueMessages(queueName).Result.ToList();
             lvMessages.Items.Clear();
             foreach (var item in messages)
             {
-                var id = BitConverter.ToString(item.Id).Replace("-", "");
-                lvMessages.Items.Add(id).SubItems.AddRange(new string[] { (item.Content.Length < 100 ? item.Content : item.Content + "..."), item.TimeStamp, item.User });
+                lvMessages.Items.Add(item.StringId).SubItems.AddRange(new string[] { item.ListViewContent, item.User, item.TimeStamp });
             }
             lvMessages.Refresh();
         }
@@ -56,8 +59,7 @@ namespace IbmMQTestApp.Forms
                 SimpleMessage selectedMessage = messages[selectedIndex];
                 var id = BitConverter.ToString(selectedMessage.Id).Replace("-", "");
                 txtMessageContent.Text = selectedMessage.Content;
-                lblMessageId.Text = $"Message ID: {id}\nTimeStamp: {selectedMessage.TimeStamp}\nUser: {selectedMessage.User}";
-
+                lblMessageId.Text = $"Message ID: {selectedMessage.StringId} TimeStamp: {selectedMessage.TimeStamp}\nUser: {selectedMessage.User} Application: {selectedMessage.Application}";
             }
         }
 
@@ -74,7 +76,6 @@ namespace IbmMQTestApp.Forms
                 int selectedIndex = lvMessages.SelectedItems[0].Index;
                 SimpleMessage selectedMessage = messages[selectedIndex];
 
-                QueueTransientService queueService = new QueueTransientService(mainForm.CurrentSettings.QueueSettings);
                 queueService.DeleteMessage(queueName, selectedMessage.Id);
                 var msgs = await queueService.GetQueueMessages(queueName);
                 messages = msgs.ToList();
@@ -89,7 +90,7 @@ namespace IbmMQTestApp.Forms
         private void ResetFields()
         {
 
-            QueueContentForm_Load();
+            QueueContentFormLoad();
             txtMessageContent.Text = string.Empty;
             lblMessageId.Text = $"Message ID:";
 
@@ -99,7 +100,6 @@ namespace IbmMQTestApp.Forms
         {
             if(CommonFormActions.ShowAskInformationMessage("Do you really want to clean this queue?", "WARNING"))
             {
-                QueueTransientService queueService = new QueueTransientService(mainForm.CurrentSettings.QueueSettings);
                 queueService.CleanQueue(queueName);
                 var msgs = await queueService.GetQueueMessages(queueName);
                 messages = msgs.ToList();

@@ -87,7 +87,7 @@
             // 
             // lvMessages
             // 
-            lvMessages.Columns.AddRange(new ColumnHeader[] { colMsgNum, colMsgTxt, colMsgTimeStamp, colMsgUser });
+            lvMessages.Columns.AddRange(new ColumnHeader[] { colMsgNum, colMsgTxt, colMsgUser, colMsgTimeStamp });
             lvMessages.FullRowSelect = true;
             lvMessages.Location = new Point(17, 22);
             lvMessages.Name = "lvMessages";

@@ -163,6 +163,7 @@ namespace IbmMQTestApp.Forms
         private async void lvQueues_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             var queue = lvQueues.GetKeyItemSelected();
+            var queueAddress = lvQueues.GetValueItemSelected();
             try
             {
                 var queueService = new QueueTransientService(CurrentSettings.QueueSettings);
@@ -174,7 +175,7 @@ namespace IbmMQTestApp.Forms
                 else
                 {
                     var messages = await queueService.GetQueueMessages(queue);
-                    QueueContentForm queueContentForm = new QueueContentForm(this, queue, messages.ToList());
+                    QueueContentForm queueContentForm = new QueueContentForm(this, queue, queueAddress);
                     Hide();
                     queueContentForm.ShowDialog();
                 }
