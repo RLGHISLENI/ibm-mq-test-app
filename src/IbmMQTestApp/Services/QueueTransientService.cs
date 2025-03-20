@@ -3,6 +3,7 @@ using System.Collections;
 using IbmMQTestApp.Settings;
 using IbmMQTestApp.Entities;
 using Newtonsoft.Json.Converters;
+using IbmMQTestApp.Utils;
 
 
 namespace IbmMQTestApp.Services
@@ -78,8 +79,9 @@ namespace IbmMQTestApp.Services
                     {
                         Content = stringMessage,
                         Id = mqMsg.MessageId,
-                        TimeStamp = mqMsg.PutDateTime.ToString("yyyy-MM-dd HH:mm:ss"),
-                        User = mqMsg.PutApplicationName
+                        TimeStamp = mqMsg.PutDateTime.ConvertToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"),
+                        User = mqMsg.UserId,
+                        Application = mqMsg.PutApplicationName,
                     };
 
                     messages.Add(message);
